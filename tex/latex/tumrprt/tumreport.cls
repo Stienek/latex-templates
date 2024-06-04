@@ -27,8 +27,12 @@
 % General %
 %%%%%%%%%%%
 
-\RequirePackage[latin1]{inputenc} % Input Encoding, just so I don't forget. Usually classes don't import that but sue me.
-
+% Document Information Definition.
+\DeclareRobustCommand*\tumauthor[1]{\gdef\@tumauthor{#1}}
+\DeclareRobustCommand*\tumshortauthor[1]{\gdef\@tumshortauthor{#1}}
+\DeclareRobustCommand*\tumtitle[1]{\gdef\@tumtitle{#1}}
+\DeclareRobustCommand*\tumshorttitle[1]{\gdef\@tumshorttitle{#1}}
+\DeclareRobustCommand*\tumdate[1]{\gdef\@tumdate{#1}}
 
 %%%%%%%%%%%%%%%%%
 % Color Options %
@@ -62,7 +66,7 @@
 \setlength{\pagerightmargin}{3cm} % Customize the right Margin.
 
 % Set Page Layout based on defined Margins.
-\RequirePackage[a4paper,
+\RequirePackage[a4paper, % We need to change this if a4paper isn't desired.
 	top=\pagetopmargin,
 	bottom=\pagebottommargin,
 	left=\pageleftmargin,
@@ -81,20 +85,20 @@
 \RequirePackage{tikz} % Required for Graphics Functionsality.
 \usetikzlibrary{calc} % This makes Tikz much more versatile.
 \RequirePackage{tikzpagenodes}
-\RequirePackage[automark]{scrlayer-scrpage} % Used to customize the Pagestyle.
+\RequirePackage[automark, plainfootsepline]{scrlayer-scrpage} % Used to customize the Pagestyle.
 \pagestyle{scrheadings} % Activate default Page Style.
 \clearpairofpagestyles % Clear default Page Style.
 \newlength{\headingsLinewidth}
-\setlength{\headingsLinewidth}{0.2029\headheight} % Making sure the Heading is scaled according to Header Height.
+\setlength{\headingsLinewidth}{0.1415\headheight} % Making sure the Heading is scaled according to Header Height.
 
 \newcommand{\headerodd}{
 \begin{tikzpicture}[remember picture, overlay]
 	% Debugging.
-	%	\draw [red] (current page header area.south west) rectangle (current page header area.north east); % Header Outline
+	%\draw [red] (current page header area.south west) rectangle (current page header area.north east); % Header Outline
 	\begin{scope}[color=primary, line width=\headingsLinewidth, line cap=butt, line join=miter]
 		% Global Anchors.
-		\node (anchor_northwest) at (current page header area.north west) {}; % Top left Headings Corner.
-		\node (anchor_northeast) at (current page header area.north east) {}; % Top right Headings Corner.
+		\node (anchor_northwest) at ([yshift=4.9285\headingsLinewidth]current page header area.south west) {}; % Top left Headings Corner.
+		\node (anchor_northeast) at ([yshift=4.9285\headingsLinewidth]current page header area.south east) {}; % Top right Headings Corner.
 		
 		% T
 		\node (T_top_left) at ([yshift=-1/2*\headingsLinewidth] anchor_northwest){}; % T top Stroke left Side.
@@ -156,8 +160,8 @@ contents={
 	% \draw [red] (current page header area.south west) rectangle (current page header area.north east); % Header Outline
 	\begin{scope}[color=primary, line width=\headingsLinewidth, line cap=butt, line join=miter]
 		% Global Anchors.
-		\node (anchor_northwest) at (current page header area.north west) {}; % Top left Headings Corner.
-		\node (anchor_northeast) at (current page header area.north east) {}; % Top right Headings Corner.
+		\node (anchor_northwest) at ([yshift=4.9285\headingsLinewidth]current page header area.south west) {}; % Top left Headings Corner.
+		\node (anchor_northeast) at ([yshift=4.9285\headingsLinewidth]current page header area.south east) {}; % Top right Headings Corner.
 		
 		% T
 		\node (T_top_left) at ([xshift=-10*\headingsLinewidth, yshift=-1/2*\headingsLinewidth] anchor_northeast){}; % T top Stroke left Side.
@@ -208,28 +212,31 @@ contents={
 
 % Header Content.
 \chead{\rightmark} % Top center: current chapter/section and its name
-\ihead{\titlehead} % Top inner: Name of the document/title
-\ifoot{\author} % Bottom inner: Author name
-\cfoot{\date} % Bottom center: date
+\ifoot{\@tumshortauthor} % Bottom inner: Author name
+\cfoot{\@tumdate} % Bottom center: date
 \ofoot{\pagemark} % Bottom outer: page number
+\if@twoside
+\ihead{\@tumshorttitle} % Top inner: Name of the document/title
+\else
+\rohead{\@tumshorttitle}
+\rehead{\@tumshorttitle}
+\fi
 
+% Plain Footer
+\ifoot*{\@tumshortauthor} % Bottom inner: Author name
+\cfoot*{\@tumdate} % Bottom center: date
+\ofoot*{\pagemark} % Bottom outer: page number
 
+%%%%%%%%%%%%%%%%%%
+% Chapter Titles %
+%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%
+% Make Titlepage %
+%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%
 % Cosmetic Upgrades %
 %%%%%%%%%%%%%%%%%%%%%
-
-%% Redefine section formatting
-%\renewcommand{\sectionformat}{\textcolor{black}{\thesection}\enskip}
-%\renewcommand{\subsectionformat}{\textcolor{black}{\thesubsection}\enskip}
-%\renewcommand{\subsubsectionformat}{\textcolor{black}{\thesubsubsection}\enskip}
-%
-%% Redefine section headings
-%\renewcommand\sectionlinesformat[4]{%
-%	\ifstr{#1}{section}
-%	{\textcolor{primary}{\makebox[0pt][r]{#3}#4}}
-%	{\@hangfrom{\hskip #2#3}{\textcolor{primary}{#4}}%
-%	}%
-%}
 
 \RequirePackage{microtype} % This enhances the Word Placement and Line Breaking. No reason not to use it :))
