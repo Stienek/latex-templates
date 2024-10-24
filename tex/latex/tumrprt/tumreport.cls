@@ -28,11 +28,28 @@
 %%%%%%%%%%%
 
 % Document Information Definition.
-\DeclareRobustCommand*\tumauthor[1]{\gdef\@tumauthor{#1}}
-\DeclareRobustCommand*\tumshortauthor[1]{\gdef\@tumshortauthor{#1}}
-\DeclareRobustCommand*\tumtitle[1]{\gdef\@tumtitle{#1}}
-\DeclareRobustCommand*\tumshorttitle[1]{\gdef\@tumshorttitle{#1}}
-\DeclareRobustCommand*\tumdate[1]{\gdef\@tumdate{#1}}
+\makeatletter
+\DeclareRobustCommand{\tumauthor}[2][]{%
+	\def\shorttumauthor{#1}%
+	\def\tumauthor{#2}%
+}
+\DeclareRobustCommand{\tumtitle}[2][]{%
+	\def\shorttumtitle{#1}%
+	\def\tumtitle{#2}%
+}
+\DeclareRobustCommand{\tumdate}[1]{%
+	\def\tumdate{#1}%
+}
+\makeatother
+
+% Handle Defaults.
+\makeatletter
+\providecommand{\shorttumauthor}{}
+\providecommand{\tumauthor}{}
+\providecommand{\shorttumtitle}{}
+\providecommand{\tumtitle}{}
+\providecommand{\tumdate}{}
+\makeatother
 
 %%%%%%%%%%%%%%%%%
 % Color Options %
@@ -40,6 +57,7 @@
 
 \RequirePackage[table]{xcolor} % Advanced Color Control and Table coloring.
 
+\makeatletter
 % Define Color Palette (Official TUM has more Colors, but we won't use those for now)
 \definecolor{dark-grey}{cmyk}{0, 0, 0, 0.8}
 \definecolor{grey}{cmyk}{0, 0, 0, 0.5}
@@ -49,12 +67,14 @@
 \definecolor{primary}{cmyk}{1, 0.43, 0, 0}
 \definecolor{secondary}{cmyk}{1, 0.54, 0.04, 0.19}
 \definecolor{tertiary}{cmyk}{1, 0.57, 0.12, 0.7}
+\makeatother
 
 %%%%%%%%%%%%%%%%%%%%%%
 % Spacing and Layout %
 %%%%%%%%%%%%%%%%%%%%%%
 
 % Set Sizes for the Page Text Area.
+\makeatletter
 \newlength{\pagetopmargin}
 \newlength{\pagebottommargin}
 \newlength{\pageleftmargin}
@@ -64,6 +84,7 @@
 \setlength{\pagebottommargin}{2cm} % Customize the bottom Margin.
 \setlength{\pageleftmargin}{3cm} % Customize the left Margin.
 \setlength{\pagerightmargin}{3cm} % Customize the right Margin.
+\makeatother
 
 % Set Page Layout based on defined Margins.
 \RequirePackage[a4paper, % We need to change this if a4paper isn't desired.
@@ -211,32 +232,171 @@ contents={
 %\setfootsepline{\headingsLinewidth}[\color{primary}]
 
 % Header Content.
-\chead{\rightmark} % Top center: current chapter/section and its name
-\ifoot{\@tumshortauthor} % Bottom inner: Author name
-\cfoot{\@tumdate} % Bottom center: date
+\chead{\color{black}\rightmark} % Top center: current chapter/section and its name
+\ifoot{\shorttumauthor} % Bottom inner: Author name
+\cfoot{\tumdate} % Bottom center: date
 \ofoot{\pagemark} % Bottom outer: page number
 \if@twoside
-\ihead{\@tumshorttitle} % Top inner: Name of the document/title
+\ihead{\shorttumtitle} % Top inner: Name of the document/title
 \else
-\rohead{\@tumshorttitle}
-\rehead{\@tumshorttitle}
+\rohead{\shorttumtitle}
+\rehead{\shorttumtitle}
 \fi
 
 % Plain Footer
-\ifoot*{\@tumshortauthor} % Bottom inner: Author name
-\cfoot*{\@tumdate} % Bottom center: date
+\ifoot*{\shorttumauthor} % Bottom inner: Author name
+\cfoot*{\tumdate} % Bottom center: date
 \ofoot*{\pagemark} % Bottom outer: page number
 
 %%%%%%%%%%%%%%%%%%
 % Chapter Titles %
 %%%%%%%%%%%%%%%%%%
 
+% Redefine the chapter command to color the title while keeping the number black
+\renewcommand*{\chapterformat}{%
+	\textcolor{primary}{\thechapter}\autodot\quad
+}
+\renewcommand*{\chaptermarkformat}{%
+	\textcolor{primary}{\thechapter}%
+}
+
+% Redefine the section command to color the title while keeping the number black
+\renewcommand*{\sectionformat}{%
+	\textcolor{primary}{\thesection}\autodot\quad
+}
+\renewcommand*{\sectionmarkformat}{%
+	\textcolor{primary}{\thesection}%
+}
+
+% Redefine the subsection command to color the title while keeping the number black
+\renewcommand*{\subsectionformat}{%
+	\textcolor{primary}{\thesubsection}\autodot\quad
+}
+\renewcommand*{\subsectionmarkformat}{%
+	\textcolor{primary}{\thesubsection}%
+}
+
+% Redefine the subsubsection command to color the title while keeping the number black
+\renewcommand*{\subsubsectionformat}{%
+	\textcolor{primary}{\thesubsubsection}\autodot\quad
+}
+\renewcommand*{\subsubsectionmarkformat}{%
+	\textcolor{primary}{\thesubsubsection}%
+}
+
 %%%%%%%%%%%%%%%%%%
 % Make Titlepage %
 %%%%%%%%%%%%%%%%%%
 
+\renewcommand{\maketitle}{
+	\enlargethispage{4.5cm} %Damit das Titelbild weit genug unten ist!
+	%\enlargethispage{40cm}
+	\begin{center}
+		\phantom{u}
+		%\vspace{0.5cm}
+		\Huge{\sc \@title}\\
+		\ifx\@vartitletranslation\empty
+		{}
+		\else
+		\large{\sc (\@vartitletranslation) \\}
+		\fi
+		\vspace{1.5cm}
+		
+		\if@langGer
+		\large{\@worktypetext \\}
+		\large{\@degreetext \\}
+		\else    
+		\large{\@worktypetext \\}
+		\large{\@degreetext \\}
+		\fi
+		\vspace{0.3cm}
+		
+		\if@langGer
+		\ifx\@institute\@instituteHCR
+		am Lehrstuhl f\"ur\\
+		STEUERUNGS- und REGELUNGSTECHNIK\\
+		Technische Universit\"at M\"unchen\\
+		\fi
+		\ifx\@institute\@instituteITR
+		am Lehrstuhl f\"ur\\
+		INFORMATIONSTECHNISCHE REGELUNG \\
+		Technische Universit\"at M\"unchen\\
+		\fi
+		\else
+		\ifx\@institute\@instituteHCR
+		%Chair of \\
+		%  \\
+		at the Human-centered Assistive Robotics \\
+		Technical University of Munich\\
+		\fi
+		\ifx\@institute\@instituteITR
+		at the chair of \\
+		INFORMATION-ORIENTED CONTROL\\
+		Technical University of Munich\\
+		\fi
+		\fi
+		\vspace{1.5cm}
+		
+		\if@langGer	
+		\large{Eingereicht von }
+		\@vartitle~\@student \\
+		\large{ am }
+		\@varyearone
+		\else
+		\large{Submitted by }
+		\@vartitle~\@student \\
+		\large{ on }
+		\@varyearone
+		\fi	
+		\vspace{1.5cm}
+		
+		\if@langGer	
+		\ifx\@institute\@instituteITR
+		\large{Erstbetreuer:	}
+		\vspace{0.4cm}
+		Univ.-Prof.~Dr.-Ing. Sandra Hirche \\
+		\large{Zweitbetreuer:	}
+		\vspace{0.4cm}
+		\@varsupervisor
+		\fi    
+		\ifx\@institute\@instituteHCR	
+		\large{Erstbetreuer: }
+		\vspace{0.4cm}
+		Univ.-Prof.~Dr. Gordon Cheng \\
+		\large{Zweitbetreuer:	}
+		\vspace{0.4cm}
+		\@varsupervisor
+		\fi    
+		\else
+		\ifx\@institute\@instituteITR
+		\large{First supervisor: } 
+		\vspace{0.4cm}
+		Univ.-Prof.~Dr.-Ing. Sandra Hirche \\
+		\large{Second supervisor:	}
+		\vspace{0.4cm}
+		\@varsupervisor
+		\fi    
+		\ifx\@institute\@instituteHCR	
+		\large{First supervisor: }         
+		\vspace{0.4cm}
+		Univ.-Prof.~Dr. Gordon Cheng \\
+		\large{Second supervisor:	}
+		\vspace{0.4cm}
+		\@varsupervisor
+		\fi    
+		\fi	
+	\end{center}
+	\vspace{2.5cm}	
+}
 %%%%%%%%%%%%%%%%%%%%%
 % Cosmetic Upgrades %
 %%%%%%%%%%%%%%%%%%%%%
+
+% Blue Boldface.
+\DeclareRobustCommand{\pbold}[1]{\textbf{\color{primary}#1}}
+
+% Make all Refrences Blue.
+\RequirePackage[colorlinks, citecolor = primary, urlcolor = primary, linkcolor = primary]{hyperref}
+
 
 \RequirePackage{microtype} % This enhances the Word Placement and Line Breaking. No reason not to use it :))
