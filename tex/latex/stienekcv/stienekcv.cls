@@ -39,10 +39,10 @@
 \setlength{\cvaccentlinewidth}{1mm}
 \DeclareOptionX{linewidth}{\setlength{\cvaccentlinewidth}{#1}}
 
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{letter}} % Passes all unhandled Options.
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}} % Passes all unhandled Options.
 \ProcessOptions\relax % Execute Code form all \DeclareOption.
 \ProcessOptionsX\relax % Execute Code form all \DeclareOptionX.
-\LoadClass{letter} % Load Class as Base.
+\LoadClass{article} % Load Class as Base.
 
 %%%%%%%%%%%%
 % Includes %
@@ -56,13 +56,14 @@
 \RequirePackage{ifluatex} % Use custom Font if running LuaLaTeX.
 
 % Graphics.
-\RequirePackage{pgf}
 \RequirePackage{tikz}
 \usetikzlibrary{shadows.blur, calc}
 \RequirePackage[table]{xcolor} % Advanced Color Control and Table coloring.
 
 % Page Setup.
-\RequirePackage{geometry}
+\RequirePackage[left=0pt, right=0pt, top=0pt, bottom=0pt]{geometry}
+\RequirePackage[absolute, overlay]{textpos}
+\RequirePackage{environ}
 
 %%%%%%%%%%%%%%%%
 % User Defines $
@@ -99,8 +100,20 @@
 % Font Size.
 \newcommand{\setfontsize}[1]{\fontsize{#1}{#1 * 1.2}\selectfont}
 
-% Page Style.
-\pagestyle{empty}	% No Page Number, no Header or Footer.
+% Remove predefined Spacing.
+\setlength{\parindent}{0pt} % No paragraph indentation
+\setlength{\parskip}{0pt}   % No space between paragraphs
+\setlength{\topskip}{0pt}   % No space above the first line
+\setlength{\partopsep}{0pt} % Space between paragraphs when the paragraph is at the top of a page
+\setlength{\parsep}{0pt}    % Space between paragraphs in a list
+\setlength{\itemsep}{0pt}    % Space between items in a list
+\setlength{\abovecaptionskip}{0pt} % Space above captions
+\setlength{\belowcaptionskip}{0pt} % Space below captions
+\setlength{\headheight}{0pt} % Height of the header
+\setlength{\headsep}{0pt}    % Space between header and text
+\setlength{\footskip}{0pt}   % Space between text and footer
+\setlength{\textheight}{\dimexpr\paperheight-2\topmargin-2\headheight-\headsep-2\footskip\relax} % Adjust text height
+
 
 % Color Definition.
 \makeatletter
@@ -119,12 +132,22 @@
 % Page Setup %
 %%%%%%%%%%%%%%
 
+% Page Style.
+\pagestyle{empty}	% No Page Number, no Header or Footer.
+
+% Create Lengths.
 \newlength{\cvtopbarheight}
 \newlength{\cvlargearrowdepth}
 \newlength{\cvsidebarwidth}
 \newlength{\cvimageinset}
 \newlength{\cvshadowradius}
+
+% Declare Lengths used in this Background.
 \setlength{\cvshadowradius}{1.5mm}
+\setlength{\cvtopbarheight}{5cm}
+\setlength{\cvlargearrowdepth}{0.381966\cvtopbarheight}
+\setlength{\cvsidebarwidth}{0.381966\paperwidth}
+\setlength{\cvimageinset}{0.1\cvtopbarheight}
 
 % Declare TikZ Layers
 \pgfdeclarelayer{background}
@@ -165,31 +188,26 @@
 			shadow blur radius=\cvshadowradius
 		}
 		]
-		% Declare Lengths used in this Background.
-		\setlength{\cvtopbarheight}{5cm}
-		\setlength{\cvlargearrowdepth}{0.381966\cvtopbarheight}
-		\setlength{\cvsidebarwidth}{0.381966\paperwidth}
-		\setlength{\cvimageinset}{0.1\cvtopbarheight}
 
 		% Declare key Nodes used for the Design.
-		\node (TopBarTopLeft) at (current page.north west) {};
-		\node (TopBarTopRight) at (current page.north east) {};
-		\node (TopBarBottomLeft) at ([yshift=-\cvtopbarheight] TopBarTopLeft) {};
-		\node (TopBarBottomRight) at ([yshift=-\cvtopbarheight] TopBarTopRight) {};
-		\node (TopBarArrowRight) at ([xshift=\cvsidebarwidth] TopBarBottomLeft) {};
-		\node (TopBarArrowTip) at ([xshift = \cvsidebarwidth / 2, yshift=-\cvlargearrowdepth] TopBarBottomLeft) {};
+		\node (TopBarTopLeft) 		at (current page.north west) {};
+		\node (TopBarTopRight) 		at (current page.north east) {};
+		\node (TopBarBottomLeft) 	at ([yshift=-\cvtopbarheight] TopBarTopLeft) {};
+		\node (TopBarBottomRight) 	at ([yshift=-\cvtopbarheight] TopBarTopRight) {};
+		\node (TopBarArrowRight) 	at ([xshift=\cvsidebarwidth] TopBarBottomLeft) {};
+		\node (TopBarArrowTip) 		at ([xshift = \cvsidebarwidth / 2, yshift=-\cvlargearrowdepth] TopBarBottomLeft) {};
 
-		\node (SideBarTopLeft) at (TopBarTopLeft) {};
-		\node (SideBarTopRight) at ([xshift=\cvsidebarwidth] SideBarTopLeft) {};
-		\node (SideBarBottomLeft) at (current page.south west) {};
-		\node (SideBarBottomRight) at ([xshift=\cvsidebarwidth] SideBarBottomLeft) {};
+		\node (SideBarTopLeft) 		at (TopBarTopLeft) {};
+		\node (SideBarTopRight) 	at ([xshift=\cvsidebarwidth] SideBarTopLeft) {};
+		\node (SideBarBottomLeft) 	at (current page.south west) {};
+		\node (SideBarBottomRight)	at ([xshift=\cvsidebarwidth] SideBarBottomLeft) {};
 
-		\node (ImageTopLeft) at ([xshift=\cvimageinset, yshift=-\cvimageinset] TopBarTopLeft) {};
-		\node (ImageTopRight) at ([xshift=-\cvimageinset, yshift=-\cvimageinset] SideBarTopRight) {};
-		\node (ImageBottomLeft) at ([xshift=\cvimageinset, yshift=\cvimageinset] TopBarBottomLeft) {};
-		\node (ImageBottomRight) at ([xshift=-\cvimageinset, yshift=\cvimageinset] TopBarArrowRight) {};
-		\node (ImageTip) at ([yshift=1.41421356 * \cvimageinset] TopBarArrowTip) {};
-		\node (ImageCenter) at ($ ([xshift=\cvsidebarwidth / 2] TopBarTopLeft)!0.5!(TopBarArrowTip) $) {};
+		\node (ImageTopLeft) 		at ([xshift=\cvimageinset, yshift=-\cvimageinset] TopBarTopLeft) {};
+		\node (ImageTopRight) 		at ([xshift=-\cvimageinset, yshift=-\cvimageinset] SideBarTopRight) {};
+		\node (ImageBottomLeft) 	at ([xshift=\cvimageinset, yshift=\cvimageinset] TopBarBottomLeft) {};
+		\node (ImageBottomRight)	at ([xshift=-\cvimageinset, yshift=\cvimageinset] TopBarArrowRight) {};
+		\node (ImageTip) 			at ([yshift=1.41421356\cvimageinset] TopBarArrowTip) {};
+		\node (ImageCenter) 		at ($ ([xshift=\cvsidebarwidth / 2] TopBarTopLeft)!0.5!(TopBarArrowTip) $) {};
 
 		% Draw the Sidebar for the small content.
 		\begin{pgfonlayer}{main}
@@ -218,15 +236,7 @@
 			% Add Outline to Image.
 			\newlength{\cvtotalradius}
 			\setlength{\cvtotalradius}{\cvshadowradius + \cvaccentlinewidth}
-			\draw[secondary,
-				  rounded corners=\cvcorners,
-				  line width=2 * \cvaccentlinewidth,
-				  \ifdrawshadow
-				  	blur shadow,
-				  	shadow blur radius=\cvtotalradius,
-				  	shadow opacity=100
-				  \fi
-				 ]
+			\draw[secondary, rounded corners=\cvcorners, line width=2\cvaccentlinewidth, shadow blur radius=\cvtotalradius, shadow opacity=100, \ifdrawshadow blur shadow\fi]
 			(ImageTopLeft.center)
 			-- (ImageTopRight.center)
 			-- (ImageBottomRight.center)
@@ -250,7 +260,7 @@
 
 			% Add Title and Subtitle
 
-			\pgfmathparse{(\paperwidth - \cvsidebarwidth - 3 * \cvimageinset)/\boxwidth}
+			\pgfmathparse{(\paperwidth - \cvsidebarwidth - 3\cvimageinset)/\boxwidth}
 
 			\node[inner sep=0pt] (TopTitleBottomLeft) at ([xshift=\cvimageinset, yshift=\cvimageinset / 2]$ (TopBarArrowRight)!0.5!(SideBarTopRight) $) [anchor=south west] {\scalebox{\pgfmathresult}{\titletext}};
 			\node[inner sep=0pt] (BottomTitleTopLeft) at ([xshift=\cvimageinset, yshift=-\cvimageinset / 2]$ (TopBarArrowRight)!0.5!(SideBarTopRight) $) [anchor=north west] {
@@ -258,16 +268,38 @@
 			};
 
 			\ifdebug % Draw Boxes in Debug Mode.
-				\draw  (TopTitleBottomLeft.south west)
+				\draw  (TopTitleBottomLeft.south west) % Title.
 					-- (TopTitleBottomLeft.north west)
 					-- (TopTitleBottomLeft.north east)
 					-- (TopTitleBottomLeft.south east)
 					-- cycle;
-				\draw  (BottomTitleTopLeft.south west)
+				\draw  (BottomTitleTopLeft.south west) % Subtitle.
 					-- (BottomTitleTopLeft.north west)
 					-- (BottomTitleTopLeft.north east)
 					-- (BottomTitleTopLeft.south east)
 					-- cycle;
+				\draw  (SideBarTopLeft.center) % Sidebar.
+					-- (SideBarTopRight.center)
+					-- (SideBarBottomRight.center)
+					-- (SideBarBottomLeft.center)
+					-- cycle;
+				\draw  (TopBarTopLeft.center) % Top Banner.
+					-- (TopBarTopRight.center)
+					-- (TopBarBottomRight.center)
+					-- (TopBarArrowRight.center)
+					-- (TopBarArrowTip.center)
+					-- (TopBarBottomLeft.center)
+					-- cycle;
+				\draw  (ImageTopLeft.center) % Image Outline.
+					-- (ImageTopRight.center)
+					-- (ImageBottomRight.center)
+					-- (ImageTip.center)
+					-- (ImageBottomLeft.center)
+					-- cycle;
+				\draw  ([xshift=\cvimageinset] current page.north west)
+					-- ([xshift=\cvimageinset] current page.south west);
+				\draw  ([xshift=\cvsidebarwidth-\cvimageinset] current page.north west)
+					-- ([xshift=\cvsidebarwidth-\cvimageinset] current page.south west);
 			\fi
 		\end{pgfonlayer}
 	\end{tikzpicture}
@@ -276,6 +308,64 @@
 %%%%%%%%%%%%
 % Elements %
 %%%%%%%%%%%%
+
+% Sidebar Section.
+\newcommand{\cvsection}[1]{%
+	\boxsize{\setfontsize{28pt}\textcolor{white}{\MakeUppercase{#1}}}%
+	\par\vspace*{5ex}\noindent % Space before the section
+	\begin{tikzpicture}[
+		remember picture,
+		overlay,
+		every shadow/.style={
+			shadow scale=1,
+			shadow xshift=0pt,
+			shadow yshift=0pt,
+			shadow opacity=100,
+			shadow blur steps=25,
+			shadow blur radius=\cvshadowradius
+		}
+		]
+		\begin{pgfonlayer}{main}
+			\node (CenterLeft) at (0, 0) {};%
+			\node (CenterRight) at (\linewidth, 0) {};%
+			\node[anchor=center, inner sep=0pt] (SectionTitle) at ($(0, 0)!0.5!(\textwidth, 0)$) {\setfontsize{28pt}\textcolor{white}{\MakeUppercase{#1}}};% Main Section Text.
+		\end{pgfonlayer}
+
+		\begin{pgfonlayer}{background}
+			\node (FlagTopLeft) 	at (current page.west |- 0,  0.5\boxheight + \cvimageinset) {};
+			\node (FlatBottomLeft) 	at (current page.west |- 0, -0.5\boxheight - \cvimageinset) {};
+			\node (FlagTopRight) 	at ([xshift=\cvimageinset, yshift= 0.5\boxheight + \cvimageinset] SectionTitle.east) {};
+			\node (FlagBottomRight) at ([xshift=\cvimageinset, yshift=-0.5\boxheight - \cvimageinset] SectionTitle.east) {};
+			\node (FlagArrowTip) 	at ([xshift=1.763932\cvimageinset + 0.381966\boxheight] SectionTitle.east) {};
+			\fill[primary, \ifdrawshadow blur shadow\fi]
+				(FlagTopLeft.center)
+				{[rounded corners=0.5\cvcorners]
+					-- (FlagTopRight.center)
+					-- (FlagArrowTip.center)
+					-- (FlagBottomRight.center)
+				}
+				-- (FlatBottomLeft.center)
+				-- cycle;
+		\end{pgfonlayer}
+
+
+
+		\ifdebug
+			\draw  (SectionTitle.south west) % Title.
+				-- (SectionTitle.north west)
+				-- (SectionTitle.north east)
+				-- (SectionTitle.south east)
+				-- cycle;
+			\draw  (FlagTopLeft.center) % Background
+				-- (FlagTopRight.center)
+				-- (FlagArrowTip.center)
+				-- (FlagBottomRight.center)
+				-- (FlatBottomLeft.center)
+				-- cycle;
+		\fi
+	\end{tikzpicture}
+	\par\vspace*{6ex}\noindent  % Space after the section
+}
 
 % Skills. Name on the left, Star Rating on the Right.
 \newcommand{\cvskill}[2]{%
@@ -311,3 +401,24 @@
 	}
 }
 
+
+% Content Zones.
+\setlength{\TPHorizModule}{1pt} % Set units to points
+\setlength{\TPVertModule}{1pt}
+\TPMargin{0pt}
+\textblockorigin{0pt}{0pt} % Set origin to the top-left corner of the page
+\setlength{\parindent}{0pt}
+
+% Sidebar environment positioned on the left
+\NewEnviron{cvsidebar}{%
+	\begin{textblock*}{0pt}(\cvimageinset, \cvtopbarheight + 1.6180339887\cvlargearrowdepth)% Define width and position
+		\setlength{\fboxsep}{0pt}% Set frame box padding
+		\ifdebug\framebox{\fi%
+			\begin{minipage}[t]{\cvsidebarwidth-2\cvimageinset}% Start of minipage
+				\BODY%
+			\end{minipage}% End of minipage
+		\ifdebug}\fi%
+	\end{textblock*}%
+}
+
+\endinput
