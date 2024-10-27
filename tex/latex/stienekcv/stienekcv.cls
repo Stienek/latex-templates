@@ -141,13 +141,15 @@
 \newlength{\cvsidebarwidth}
 \newlength{\cvimageinset}
 \newlength{\cvshadowradius}
+\newlength{\cvcontentinset}
 
 % Declare Lengths used in this Background.
 \setlength{\cvshadowradius}{1.5mm}
-\setlength{\cvtopbarheight}{5cm}
-\setlength{\cvlargearrowdepth}{0.381966\cvtopbarheight}
 \setlength{\cvsidebarwidth}{0.381966\paperwidth}
+\setlength{\cvtopbarheight}{0.75\cvsidebarwidth}
+\setlength{\cvlargearrowdepth}{0.381966\cvtopbarheight}
 \setlength{\cvimageinset}{0.1\cvtopbarheight}
+\setlength{\cvcontentinset}{1.5\cvimageinset}
 
 % Declare TikZ Layers
 \pgfdeclarelayer{background}
@@ -183,7 +185,7 @@
 			shadow scale=1,
 			shadow xshift=0pt,
 			shadow yshift=0pt,
-			shadow opacity=100,
+			shadow opacity=50,
 			shadow blur steps=25,
 			shadow blur radius=\cvshadowradius
 		}
@@ -312,15 +314,15 @@
 % Sidebar Section.
 \newcommand{\cvsection}[1]{%
 	\boxsize{\setfontsize{28pt}\textcolor{white}{\MakeUppercase{#1}}}%
-	\par\vspace*{5ex}\noindent % Space before the section
-	\begin{tikzpicture}[
+	\par\vspace*{5ex}\noindent% Space before the section
+	\begin{tikzpicture}[%
 		remember picture,
 		overlay,
 		every shadow/.style={
 			shadow scale=1,
-			shadow xshift=0pt,
-			shadow yshift=0pt,
-			shadow opacity=100,
+			shadow xshift=1pt,
+			shadow yshift=-1pt,
+			shadow opacity=50,
 			shadow blur steps=25,
 			shadow blur radius=\cvshadowradius
 		}
@@ -336,12 +338,14 @@
 			\node (FlatBottomLeft) 	at (current page.west |- 0, -0.5\boxheight - \cvimageinset) {};
 			\node (FlagTopRight) 	at ([xshift=\cvimageinset, yshift= 0.5\boxheight + \cvimageinset] SectionTitle.east) {};
 			\node (FlagBottomRight) at ([xshift=\cvimageinset, yshift=-0.5\boxheight - \cvimageinset] SectionTitle.east) {};
-			\node (FlagArrowTip) 	at ([xshift=1.763932\cvimageinset + 0.381966\boxheight] SectionTitle.east) {};
+			\node (FlagArrowTip) 	at ([xshift=1.763932\cvimageinset + 0.381966\boxheight, yshift= 0.5\boxheight + \cvimageinset] SectionTitle.east) {};
 			\fill[primary, \ifdrawshadow blur shadow\fi]
 				(FlagTopLeft.center)
 				{[rounded corners=0.5\cvcorners]
 					-- (FlagTopRight.center)
-					-- (FlagArrowTip.center)
+					{[rounded corners=3\cvcorners]
+						-- (FlagArrowTip.center)
+					}
 					-- (FlagBottomRight.center)
 				}
 				-- (FlatBottomLeft.center)
@@ -363,42 +367,166 @@
 				-- (FlatBottomLeft.center)
 				-- cycle;
 		\fi
-	\end{tikzpicture}
-	\par\vspace*{6ex}\noindent  % Space after the section
+	\end{tikzpicture}%
+	\par\vspace*{6ex}\noindent% Space after the section
+}
+\newcommand{\cvsubsection}[1]{%
+	\boxsize{\setfontsize{24pt}\textcolor{white}{\MakeUppercase{#1}}}%
+	\par\vspace*{1ex}\noindent% Space before the section
+	\begin{tikzpicture}[remember picture, 	overlay]
+		\node (CenterLeft) at (0, 0) {};%
+		\node (CenterRight) at (\linewidth, 0) {};%
+		\node[anchor=center, inner sep=0pt] (SectionTitle) at ($(0, 0)!0.5!(\textwidth, 0)$) {\setfontsize{22pt}\textcolor{black}{\MakeUppercase{#1}}};% Main Section Text.
+
+		\ifdebug
+			\draw  (SectionTitle.south west) % Title.
+				-- (SectionTitle.north west)
+				-- (SectionTitle.north east)
+				-- (SectionTitle.south east)
+				-- cycle;
+		\fi
+	\end{tikzpicture}%
+	\par\vspace*{1ex}\noindent% Space after the section
+}
+
+% Contact Field.
+\newcommand{\cvcontactitem}[2]{%
+	\boxsize{\setfontsize{28pt}\textcolor{white}{\MakeUppercase{A}}}%
+	\par\vspace*{1ex}\noindent%
+	\begin{tikzpicture}[remember picture, overlay]
+		\begin{pgfonlayer}{main}
+			\node[inner sep=0pt, anchor=center] (CenterLeft) at (0, 0) {\includegraphics[width=1.618\boxheight]{#1}};%
+			\node[inner sep=0pt, anchor=west] (TextLeft) at (2\cvcontentinset, 0) {#2};%
+		\end{pgfonlayer}
+
+		\begin{pgfonlayer}{background}
+			\node (FlagTopLeft) 	at (current page.west |- 0,  0.5\boxheight + 0.5\cvimageinset) {};
+			\node (FlatBottomLeft) 	at (current page.west |- 0, -0.5\boxheight - 0.5\cvimageinset) {};
+			\node (FlagTopRight) 	at ([yshift= 0.5\boxheight + 0.5\cvimageinset] CenterLeft.east) {};
+			\node (FlagBottomRight) at ([yshift=-0.5\boxheight - 0.5\cvimageinset] CenterLeft.east) {};
+			\node (FlagArrowTip) 	at ([xshift=0.381966\cvimageinset + 0.381966\boxheight, yshift= 0.5\boxheight + 0.5\cvimageinset] CenterLeft.east) {};
+			\fill[primary, \ifdrawshadow blur shadow\fi]
+			(FlagTopLeft.center)
+			{[rounded corners=0.5\cvcorners]
+				-- (FlagTopRight.center)
+				{[rounded corners=3\cvcorners]
+					-- (FlagArrowTip.center)
+				}
+				-- (FlagBottomRight.center)
+			}
+			-- (FlatBottomLeft.center)
+			-- cycle;
+		\end{pgfonlayer}
+
+
+
+		\ifdebug
+		\draw  (CenterLeft.south west) % Picture.
+			-- (CenterLeft.north west)
+			-- (CenterLeft.north east)
+			-- (CenterLeft.south east)
+			-- cycle;
+		\draw  (TextLeft.south west) % Title.
+			-- (TextLeft.north west)
+			-- (TextLeft.north east)
+			-- (TextLeft.south east)
+			-- cycle;
+		\draw  (FlagTopLeft.center) % Background
+			-- (FlagTopRight.center)
+			-- (FlagArrowTip.center)
+			-- (FlagBottomRight.center)
+			-- (FlatBottomLeft.center)
+			-- cycle;
+		\fi
+	\end{tikzpicture}%
+	\par\vspace*{2ex}\noindent% Space after the section
 }
 
 % Skills. Name on the left, Star Rating on the Right.
+\newlength{\skillpercent}
 \newcommand{\cvskill}[2]{%
-	\pgfmathparse{#2}
-	\let\stars\pgfmathresult
+	\setlength{\skillpercent}{#2\linewidth}%
+	\vspace*{-2ex}\\%
+	\boxsize{A}%
+	\begin{tikzpicture}[%
+		remember picture,
+		overlay,
+		every shadow/.style={
+			shadow scale=1,
+			shadow xshift=1pt,
+			shadow yshift=-1pt,
+			shadow opacity=50,
+			shadow blur steps=25,
+			shadow blur radius=0.5\cvshadowradius
+		}
+		]
+		% Text.
+		\node[inner sep=0pt, anchor=west] (TextLeft) at (0, 0) {#1};
 
-	\pgfmathparse{ceil(\stars)}
-	\let\ceilstars\pgfmathresult
+		\node (FlagTopLeft) 	at (0.5\linewidth, 0.5\boxheight) {};
+		\node (FlatBottomLeft) 	at (0.5\linewidth, -0.5\boxheight) {};
+		\node (FlagTopRight) 	at (\linewidth-0.381966\boxheight, 0.5\boxheight) {};
+		\node (FlagBottomRight) at (\linewidth-0.381966\boxheight, -0.5\boxheight) {};
+		\node (FlagArrowTip) 	at (\linewidth, 0.5\boxheight) {};
 
-	\setlength{\fboxsep}{0pt}
-	\makebox[\linewidth][l]{%
-		\makebox{#1}
-		\hfill
-		\makebox{%
-			\foreach \index in {1, 2, 3, 4, 5}{%
-				\pgfmathparse{\stars >= \index}
-				\ifnum\pgfmathresult=1
-				\includegraphics[width=\fontcharht\font`A]{star_full}%
-				\else
-				\pgfmathparse{\ceilstars == \index}
-				\ifnum\pgfmathresult=1
-				\includegraphics[width=\fontcharht\font`A]{star_half}%
-				\else
-				\includegraphics[width=\fontcharht\font`A]{star_empty}%
-				\fi
-				\fi
-				\pgfmathparse{\index < 5}
-				\ifnum\pgfmathresult=1
-				\hspace{1ex}%
-				\fi
-			}%
-		}%
-	}
+		% Use \pgfmathresult in node coordinates with braces
+		\node (TFlagTopLeft)     at (0.5\linewidth, 0.5\boxheight) {};
+		\node (TFlatBottomLeft)  at (0.5\linewidth, -0.5\boxheight) {};
+		\node (TFlagTopRight)    at (0.5\linewidth+0.5\skillpercent-0.381966\boxheight, 0.5\boxheight) {};
+		\node (TFlagBottomRight) at (0.5\linewidth+0.5\skillpercent-0.381966\boxheight, -0.5\boxheight) {};
+		\node (TFlagArrowTip)    at (0.5\linewidth+0.5\skillpercent, 0.5\boxheight) {};
+
+		\fill[white, rounded corners=0.25\cvcorners, \ifdrawshadow blur shadow\fi]
+		(FlagTopLeft.center)
+		-- (FlagTopRight.center)
+		{[rounded corners=0.5\cvcorners]
+			-- (FlagArrowTip.center)
+		}
+		-- (FlagBottomRight.center)
+		-- (FlatBottomLeft.center)
+		-- cycle;
+
+		\begin{scope} % Cliping environnment.
+			\clip  (TFlagTopLeft.center)
+				-- (TFlagTopRight.center)
+				-- (TFlagArrowTip.center)
+				-- (TFlagBottomRight.center)
+				-- (TFlatBottomLeft.center)
+				-- cycle;
+
+			% Add the Image to the Cutout Zone.
+			\fill[primary, rounded corners=0.25\cvcorners]
+				(FlagTopLeft.center)
+				-- (FlagTopRight.center)
+				{[rounded corners=0.5\cvcorners]
+					-- (FlagArrowTip.center)
+				}
+				-- (FlagBottomRight.center)
+				-- (FlatBottomLeft.center)
+				-- cycle;
+		\end{scope}
+
+
+		\ifdebug
+			\draw  (TextLeft.south west) % Title.
+			-- (TextLeft.north west)
+			-- (TextLeft.north east)
+			-- (TextLeft.south east)
+			-- cycle;
+			\draw  (FlagTopLeft.center) % Background.
+			-- (FlagTopRight.center)
+			-- (FlagArrowTip.center)
+			-- (FlagBottomRight.center)
+			-- (FlatBottomLeft.center)
+			-- cycle;
+			\draw  (TFlagTopLeft.center) % Value Bar.
+			-- (TFlagTopRight.center)
+			-- (TFlagArrowTip.center)
+			-- (TFlagBottomRight.center)
+			-- (TFlatBottomLeft.center)
+			-- cycle;
+		\fi
+	\end{tikzpicture}\\%
 }
 
 
@@ -411,10 +539,10 @@
 
 % Sidebar environment positioned on the left
 \NewEnviron{cvsidebar}{%
-	\begin{textblock*}{0pt}(\cvimageinset, \cvtopbarheight + 1.6180339887\cvlargearrowdepth)% Define width and position
+	\begin{textblock*}{0pt}(\cvcontentinset, \cvtopbarheight + 1.25\cvlargearrowdepth)% Define width and position
 		\setlength{\fboxsep}{0pt}% Set frame box padding
 		\ifdebug\framebox{\fi%
-			\begin{minipage}[t]{\cvsidebarwidth-2\cvimageinset}% Start of minipage
+			\begin{minipage}[t]{\cvsidebarwidth-2\cvcontentinset}% Start of minipage
 				\BODY%
 			\end{minipage}% End of minipage
 		\ifdebug}\fi%
