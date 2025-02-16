@@ -1,0 +1,208 @@
+% Redefine the chapter heading format:
+\newcommand{\fancychaptertitle}[2]{%
+	% Here #1 = chapter number, #2 = chapter title, #3 = additional info.
+	\begin{tikzpicture}[overlay, remember picture]
+		% General Nodes.
+		\node (chapterCornerL) at ([yshift={-2.25cm}] current page text area.north west) {};
+		\node (chapterCornerR) at ([yshift={-2.25cm}] current page text area.north east) {};
+
+		% Outer Skews.
+		\drawSkew{chapterSkewPriBL}{chapterCornerL}{SW}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
+		\drawSkew{chapterSkewPriBR}{chapterCornerR}{SE}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+
+		% Primary Connector.
+		\draw[primary, line width=\lineThickness] ([yshift=-0.5\lineThickness] chapterSkewPriBLN) -- ([yshift=-0.5\lineThickness] chapterSkewPriBRN);
+
+		% Calculate Offset for Secondary Color.
+		\newdimen\secondaryOffset
+		\newdimen\secondaryOffsetMacro
+		\pgfmathsetmacro{\secondaryOffsetMacro}{-1 * tan(\skewAngle) * (\lineThickness - \lineGap)}
+		\pgfmathsetlength{\secondaryOffset}{\secondaryOffsetMacro}
+
+		% Guides for Secondary Color.
+		\node (chapterSkewSecBLNode) at ([xshift={\secondaryOffset}, yshift={-\lineThickness - \lineGap}] chapterSkewPriBLNE) {};
+		\node (chapterSkewSecBRNode) at ([xshift={-\secondaryOffset}, yshift={-\lineThickness - \lineGap}] chapterSkewPriBRNW) {};
+
+		% Secondary Outer Skew.
+		\drawSkew{chapterSkewSecBL}{chapterSkewSecBLNode}{NW}{0.25\textHeight}{\skewThicknessSmall}{\skewAngle}{secondary}
+		\drawSkew{chapterSkewSecBR}{chapterSkewSecBRNode}{NE}{0.25\textHeight}{\skewThicknessSmall}{-\skewAngle}{secondary}
+
+		% Secondary Connector.
+		\draw[secondary, line width=\lineThicknessSmall] ([yshift=-0.5\lineThicknessSmall] chapterSkewSecBLN)
+		-- ([yshift=-0.5\lineThicknessSmall] chapterSkewSecBRN);
+
+		% Primary Lower Text Border. TODO: The Offset on the Diamond isn't perfect but will work for now.
+		\node (chapterSkewPriMLNode) at ([yshift={\lineGap}]chapterSkewPriBLN) {};
+		\drawSkew{chapterSkewPriML}{chapterSkewPriMLNode}{S}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+		\pgfmathparse{0.5 * 0.70711 * (tan(\skewAngle) * \textHeight - 1.41421\lineGap)}
+		\newdimen\chapterDiamondW
+		\pgfmathsetlength{\chapterDiamondW}{\pgfmathresult}
+		\node[fill=secondary, minimum width=\chapterDiamondW, minimum height=\chapterDiamondW, inner sep=0pt, rotate=45] (chapterDiamondL) at ([xshift={-0.5\lineGap}] $(chapterSkewPriBLW) !0.5! (chapterSkewPriMLW)$) {};
+
+		% Draw Title.
+		\node[anchor=south west, inner sep=0pt, text=secondary] (chapterTitleBackground) at (chapterSkewPriMLSE) {#2};
+		\node[anchor=center, inner sep=0pt, text=primaryDark] (chapterTitleForeground) at ([xshift=-0.2mm, yshift=0.2mm]chapterTitleBackground.center) {#2};
+		\node[anchor=east, inner sep=0pt, text=secondary] (chapterNum) at (chapterTitleForeground.east -| chapterSkewPriBRNE) {#1};
+	\end{tikzpicture}
+}
+
+\newcommand{\fancysectiontitleNN}[1]{%
+	% Here #1 = Section Title.
+	\begin{tikzpicture}[overlay, remember picture]
+		% General Nodes.
+		\node (sectionAnchor) at (0, 0) {};
+		\node (sectionCornerL) at (sectionAnchor -| current page text area.north west) {};
+		\node (sectionCornerR) at (sectionAnchor -| current page text area.north east) {};
+		\node (sectionCornerTL) at ([yshift=0.5\textHeight] sectionAnchor -| current page text area.north west) {};
+		\node (sectionCornerTR) at ([yshift=0.5\textHeight] sectionAnchor -| current page text area.north east) {};
+
+		% General Nodes.
+		\node (sectionCenter) at ($ (sectionCornerL) !0.5! (sectionCornerR) $) {};
+
+		% Primary Outer Skew.
+		\drawSkew{sectionSkewPriLO}{sectionCornerL}{SW}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
+		\drawSkew{sectionSkewPriRO}{sectionCornerR}{SE}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+
+		% Add the Text.
+		\node[anchor=base, inner sep=0pt] (sectionTitle) at (sectionCenter) {#1};
+		\node (sectionTitleAnchor) at (sectionCenter |- sectionSkewPriLON) {};
+		\node (sectionTitleNW) at ([yshift={0.5\textHeight}] sectionTitle.west |- sectionTitleAnchor) {};
+		\node (sectionTitleNE) at ([yshift={0.5\textHeight}] sectionTitle.east |- sectionTitleAnchor) {};
+
+		% Primary Inner Bottom Skew.
+		\pgfmathparse{0.5\textHeight - \lineGap}
+		\drawSkew{sectionSkewPriLIT}{sectionTitleNW}{NE}{\pgfmathresult}{\skewThickness}{\skewAngle}{primary}
+		\drawSkew{sectionSkewPriRIT}{sectionTitleNE}{NW}{\pgfmathresult}{\skewThickness}{-\skewAngle}{primary}
+
+		% Primary Inner Top Skew.
+		\node (sectionSkewPriLIBNode) at ([yshift={-\lineGap}] sectionSkewPriLITSE) {};
+		\node (sectionSkewPriRIBNode) at ([yshift={-\lineGap}] sectionSkewPriRITSW) {};
+		\drawSkew{sectionSkewPriLIB}{sectionSkewPriLIBNode}{NE}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+		\drawSkew{sectionSkewPriRIB}{sectionSkewPriRIBNode}{NW}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
+
+		% Primary Connector Lines.
+		\draw[primary, line width=\lineThickness] ([yshift=-0.5\lineThickness] sectionSkewPriLON) -- ([yshift=-0.5\lineThickness] sectionSkewPriLIBN);
+		\draw[primary, line width=\lineThickness] ([yshift=-0.5\lineThickness] sectionSkewPriRON) -- ([yshift=-0.5\lineThickness] sectionSkewPriRIBN);
+
+		% Top Outer Primary Skew.
+		\node (sectionSkewPriLOTNode) at ([yshift={\lineGap}] sectionSkewPriLON) {};
+		\node (sectionSkewPriROTNode) at ([yshift={\lineGap}] sectionSkewPriRON) {};
+		\drawSkew{sectionSkewPriLOT}{sectionSkewPriLOTNode}{S}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+		\drawSkew{sectionSkewPriROT}{sectionSkewPriROTNode}{S}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
+
+		% Calculate Offset for Secondary Color.
+		\newdimen\secondaryOffset
+		\newdimen\secondaryOffsetMacro
+		\pgfmathsetmacro{\secondaryOffsetMacro}{-1 * tan(\skewAngle) * (\lineThickness - \lineGap)}
+		\pgfmathsetlength{\secondaryOffset}{\secondaryOffsetMacro}
+
+		% Guides for Secondary Color.
+		\node (sectionSkewSecOLNode) at ([xshift={\secondaryOffset}, yshift={-\lineThickness - \lineGap}] sectionSkewPriLONE) {};
+		\node (sectionSkewSecORNode) at ([xshift={-\secondaryOffset}, yshift={-\lineThickness - \lineGap}] sectionSkewPriRONW) {};
+		\node (sectionSkewSecILNode) at ([xshift={-\secondaryOffset}, yshift={-\lineThickness - \lineGap}] sectionSkewPriLIBNW) {};
+		\node (sectionSkewSecIRNode) at ([xshift={\secondaryOffset}, yshift={-\lineThickness - \lineGap}] sectionSkewPriRIBNE) {};
+
+		% Secondary Outer Skew.
+		\drawSkew{sectionSkewSecLO}{sectionSkewSecOLNode}{NW}{0.25\textHeight}{\skewThicknessSmall}{\skewAngle}{secondary}
+		\drawSkew{sectionSkewSecRO}{sectionSkewSecORNode}{NE}{0.25\textHeight}{\skewThicknessSmall}{-\skewAngle}{secondary}
+
+		% Secondary Inner Skew.
+		\drawSkew{sectionSkewSecLI}{sectionSkewSecILNode}{NE}{0.25\textHeight}{\skewThicknessSmall}{-\skewAngle}{secondary}
+		\drawSkew{sectionSkewSecRI}{sectionSkewSecIRNode}{NW}{0.25\textHeight}{\skewThicknessSmall}{\skewAngle}{secondary}
+
+		% Secondary Connector Lines.
+		\draw[secondary, line width=\lineThicknessSmall] ([yshift=-0.5\lineThicknessSmall] sectionSkewSecLON)
+		-- ([yshift=-0.5\lineThicknessSmall] sectionSkewSecLIN);
+		\draw[secondary, line width=\lineThicknessSmall] ([yshift=-0.5\lineThicknessSmall] sectionSkewSecRON)
+		-- ([yshift=-0.5\lineThicknessSmall] sectionSkewSecRIN);
+	\end{tikzpicture}
+}
+
+\newcommand{\fancysectiontitle}[2]{%
+	% Here #1 = section Number, #2 = section Title.
+	\begin{tikzpicture}[overlay, remember picture]
+		% General Nodes.
+		\node (sectionAnchor) at (0, 0) {};
+		\node (sectionCornerL) at (sectionAnchor -| current page text area.north west) {};
+		\node (sectionCornerR) at (sectionAnchor -| current page text area.north east) {};
+		\node (sectionCornerTL) at ([yshift=0.5\textHeight] sectionAnchor -| current page text area.north west) {};
+		\node (sectionCornerTR) at ([yshift=0.5\textHeight] sectionAnchor -| current page text area.north east) {};
+
+		% Outer Ticks.
+		\drawSkew{sectionSkewPriBOL}{sectionCornerTL}{NW}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+		\node (sectionSkewPriTOLNode) at ([yshift=\lineGap]sectionSkewPriBOLN) {};
+		\drawSkew{sectionSkewPriTOL}{sectionSkewPriTOLNode}{S}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
+		\drawSkew{sectionSkewPriBOR}{sectionCornerTR}{NE}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
+		\node (sectionSkewPriTORNode) at ([yshift=\lineGap]sectionSkewPriBORN) {};
+		\drawSkew{sectionSkewPriTOR}{sectionSkewPriTORNode}{S}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+
+		% Draw Title.
+		\node[anchor=base west, inner sep=0pt] (sectionTitleBackground) at (sectionSkewPriBOLSE) {#2};
+		\node[anchor=base east, inner sep=0pt, text=secondary] (sectionNum) at (sectionSkewPriBORSW) {#1};
+
+		% Outer Skews.
+		\drawSkew{sectionSkewPriBL}{sectionTitleBackground.base east}{SW}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
+		\drawSkew{sectionSkewPriBR}{sectionNum.base west}{SE}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+
+		% Primary Connector.
+		\draw[primary, line width=\lineThickness] ([yshift=-0.5\lineThickness] sectionSkewPriBLN) -- ([yshift=-0.5\lineThickness] sectionSkewPriBRN);
+
+		% Calculate Offset for Secondary Color.
+		\newdimen\secondaryOffset
+		\newdimen\secondaryOffsetMacro
+		\pgfmathsetmacro{\secondaryOffsetMacro}{-1 * tan(\skewAngle) * (\lineThickness - \lineGap)}
+		\pgfmathsetlength{\secondaryOffset}{\secondaryOffsetMacro}
+
+		% Guides for Secondary Color.
+		\node (sectionSkewSecBLNode) at ([xshift={\secondaryOffset}, yshift={-\lineThickness - \lineGap}] sectionSkewPriBLNE) {};
+		\node (sectionSkewSecBRNode) at ([xshift={-\secondaryOffset}, yshift={-\lineThickness - \lineGap}] sectionSkewPriBRNW) {};
+
+		% Secondary Outer Skew.
+		\drawSkew{sectionSkewSecBL}{sectionSkewSecBLNode}{NW}{0.25\textHeight}{\skewThicknessSmall}{\skewAngle}{secondary}
+		\drawSkew{sectionSkewSecBR}{sectionSkewSecBRNode}{NE}{0.25\textHeight}{\skewThicknessSmall}{-\skewAngle}{secondary}
+
+		% Secondary Connector.
+		\draw[secondary, line width=\lineThicknessSmall] ([yshift=-0.5\lineThicknessSmall] sectionSkewSecBLN)
+		-- ([yshift=-0.5\lineThicknessSmall] sectionSkewSecBRN);
+
+		% Primary Lower Text Border. TODO: The Offset on the Diamond isn't perfect but will work for now.
+		\node (sectionSkewPriMLNode) at ([yshift={\lineGap}]sectionSkewPriBLN) {};
+		\node (sectionSkewPriMRNode) at ([yshift={\lineGap}]sectionSkewPriBRN) {};
+		\drawSkew{sectionSkewPriML}{sectionSkewPriMLNode}{S}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+		\drawSkew{sectionSkewPriMR}{sectionSkewPriMRNode}{S}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
+	\end{tikzpicture}
+}
+
+% Unnumbered Chapter Titles.
+\titleformat{name=\chapter,numberless}[block]%
+	{\normalfont\Huge\bfseries}%
+	{}%
+	{0pt}%
+	{\fancychaptertitle{}{#1}}% \addcontentsline{toc}{chapter}{#1} can also be added to have it in the TOC
+
+% Numbered Chapter Titles.
+\titleformat{name=\chapter}[block]%
+	{\normalfont\Huge\bfseries}%
+	{}%
+	{0pt}%
+	{\fancychaptertitle{\thechapter}{#1}}%
+
+% Chapter Spacing.
+\titlespacing*{\chapter}{0pt}{0pt}{25pt}
+
+% Unnumbered Section Titles.
+\titleformat{name=\section,numberless}[block]%
+	{\normalfont\large\bfseries}%
+	{}%
+	{0pt}%
+	{\fancysectiontitleNN{#1}}
+
+% Numbered Section Titles.
+\titleformat{name=\section}[block]%
+	{\normalfont\large\bfseries}%  % Font styling for section titles
+	{}%  % Label, empty to remove numbering
+	{0pt}%  % Space between label and title
+	{\fancysectiontitle{\thesection}{#1}}
+
+% Section Spacing.
+\titlespacing*{\section}{0pt}{0.3cm}{0.1cm}

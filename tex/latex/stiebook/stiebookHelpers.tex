@@ -1,0 +1,103 @@
+% Define Style Variables.
+\newlength{\lineThickness}
+\newlength{\lineThicknessSmall}
+\newlength{\skewThickness}
+\newlength{\skewThicknessSmall}
+\newlength{\skewHeight}
+\newlength{\skewHeightSmall}
+\newlength{\lineGap}
+
+\setlength{\lineThickness}{0.2mm}
+\setlength{\lineThicknessSmall}{0.618833\lineThickness}
+\setlength{\skewThickness}{1mm}
+\setlength{\skewThicknessSmall}{0.618833\skewThickness}
+\setlength{\skewHeight}{6mm}
+\setlength{\skewHeightSmall}{0.618833\skewHeight}
+\pgfmathsetmacro{\skewAngle}{45}
+\setlength{\lineGap}{0.618833\lineThicknessSmall}
+
+\newlength{\skewAnchorDX}
+\newlength{\skewAnchorDY}
+
+% Get Text Heigt and Width.
+\newsavebox{\mybox}
+\newdimen\textHeight
+\sbox{\mybox}{\large M}
+\textHeight=\ht\mybox % Get the height of the text
+
+% This is the main Function. It creates the Skewed shape seen all around the style.
+\newcommand{\drawSkew}[7]{%
+	% Parameters:
+	% #1 = Name of the coordinate set
+	% #2 = Anchor node (e.g., A)
+	% #3 = Anchor position (one of: N, S, E, W, NE, NW, SE, SW, center)
+	% #4 = Height
+	% #5 = Width
+	% #6 = Angle
+	% #7 = Color
+
+	% Calculate Dimensions
+	\pgfmathsetlengthmacro{\h}{#4 / 2} % Half height
+	\pgfmathsetlengthmacro{\w}{#5 / 2} % Half width
+	\pgfmathsetlengthmacro{\t}{(tan(#6) * #4)/2} % Tilt offset
+
+
+	\ifthenelse{\equal{#3}{C}}{%
+		\setlength{\skewAnchorDX}{0cm}
+		\setlength{\skewAnchorDY}{0cm}
+	}{%
+	\ifthenelse{\equal{#3}{E}}{%
+		\setlength{\skewAnchorDX}{-\w}
+		\setlength{\skewAnchorDY}{0cm}
+	}{%
+	\ifthenelse{\equal{#3}{W}}{%
+		\setlength{\skewAnchorDX}{\w}
+		\setlength{\skewAnchorDY}{0cm}
+	}{%
+	\ifthenelse{\equal{#3}{N}}{%
+		\setlength{\skewAnchorDX}{-\t}(
+		\setlength{\skewAnchorDY}{-\h}
+	}{%
+	\ifthenelse{\equal{#3}{NE}}{%
+		\setlength{\skewAnchorDX}{\dimexpr-\t-\w\relax}
+		\setlength{\skewAnchorDY}{-\h}
+	}{%
+	\ifthenelse{\equal{#3}{NW}}{%
+		\setlength{\skewAnchorDX}{\dimexpr-\t + \w\relax}
+		\setlength{\skewAnchorDY}{-\h}
+	}{%
+	\ifthenelse{\equal{#3}{S}}{%
+		\setlength{\skewAnchorDX}{\t}
+		\setlength{\skewAnchorDY}{\h}
+	}{%
+	\ifthenelse{\equal{#3}{SE}}{%
+		\setlength{\skewAnchorDX}{\dimexpr\t - \w\relax}
+		\setlength{\skewAnchorDY}{\h}
+	}{%
+	\ifthenelse{\equal{#3}{SW}}{%
+		\setlength{\skewAnchorDX}{\dimexpr\t + \w\relax}
+		\setlength{\skewAnchorDY}{\h}
+	}{% Default: Center.
+		\setlength{\skewAnchorDX}{0cm}
+		\setlength{\skewAnchorDY}{0cm}
+	}}}}}}}}}
+
+	% Create all Anchors.
+	\path let \p1 = (#2) in
+	coordinate (#1C) at (\x1 + \skewAnchorDX, \y1 + \skewAnchorDY)
+	coordinate (#1E) at ([xshift={\w}] #1C)
+	coordinate (#1W) at ([xshift={-\w}] #1C)
+	coordinate (#1N) at ([xshift={\t}, yshift={\h}] #1C)
+	coordinate (#1NE) at ([xshift={\t + \w}, yshift={\h}] #1C)
+	coordinate (#1NW) at ([xshift={\t - \w}, yshift={\h}] #1C)
+	coordinate (#1S) at ([xshift={-\t}, yshift={-\h}] #1C)
+	coordinate (#1SE) at ([xshift={-\t + \w}, yshift={-\h}] #1C)
+	coordinate (#1SW) at ([xshift={-\t - \w}, yshift={-\h}] #1C);
+
+	% Draw the main Shape.
+	\fill[#7]  (#1NE)
+	-- (#1NW)
+	-- (#1SW)
+	-- (#1SE)
+	-- cycle;
+}
