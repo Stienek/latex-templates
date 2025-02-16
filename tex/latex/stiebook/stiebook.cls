@@ -15,13 +15,13 @@
 \DeclareOption{preview}{\previewtrue}
 
 % For easier Debugging. Remove when drafting a final Version.
-\newif\ifdebug
-\DeclareOption{debug}{\debugtrue}
+%\newif\ifdebug
+%\DeclareOption{debug}{\debugtrue}
 
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{scrbook}}  % Pass all Options to scrbook.
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}  % Pass all Options to scrbook.
 \ProcessOptions\relax  % Process Options.
 
-\LoadClass{scrbook}  % Load Koma-Script Book Class.
+\LoadClass{book}  % Load Koma-Script Book Class.
 
 %%%%%%%%%%%
 % General %
@@ -61,7 +61,7 @@
 % Pagestyle %
 %%%%%%%%%%%%%
 
-\RequirePackage[]{scrlayer-scrpage}
+\RequirePackage{fancyhdr}
 \RequirePackage{tikz}
 \usetikzlibrary{fit, calc, shapes.geometric} % This makes Tikz much more versatile.
 \RequirePackage{tikzpagenodes}
@@ -292,119 +292,104 @@
 }
 
 % New Command for Chapter Titles.
-\NewDocumentCommand{\stiechapter}{ s o m }{%
-	\IfBooleanTF{#1}{%
-		% Starred version: unnumbered chapter
-		\IfValueTF{#2}{%
-			\chapter*[#2]{#3}%
-			\markboth{}{#2}%
-			\addcontentsline{toc}{chapter}{#2}%
-		}{%
-			\chapter*{#3}%
-			\markboth{}{#3}%
-			\addcontentsline{toc}{chapter}{#3}%
-		}%
-	}{%
-		% Non-starred version: numbered chapter
-		\IfValueTF{#2}{%
-			\chapter[#2]{#3}%
-			\markboth{}{#2}%
-		}{%
-			\chapter{#3}%
-			\markboth{}{#3}%
-		}%
-	}%
-}
+%\NewDocumentCommand{\stiechapter}{ s o m }{%
+%	\IfBooleanTF{#1}{%
+%		% Starred version: unnumbered chapter
+%		\IfValueTF{#2}{%
+%			\chapter*[#2]{#3}%
+%			\markboth{}{#2}%
+%			\addcontentsline{toc}{chapter}{#2}%
+%		}{%
+%			\chapter*{#3}%
+%			\markboth{}{#3}%
+%			\addcontentsline{toc}{chapter}{#3}%
+%		}%
+%	}{%
+%		% Non-starred version: numbered chapter
+%		\IfValueTF{#2}{%
+%			\chapter[#2]{#3}%
+%			\markboth{}{#2}%
+%		}{%
+%			\chapter{#3}%
+%			\markboth{}{#3}%
+%		}%
+%	}%
+%}
 
 % Reduce margin between content and header/footer areas
 \setlength{\headsep}{10pt}
 \setlength{\footskip}{5pt}
 
 % Reset Page Styles.
-\clearpairofpagestyles
-
-% Create new "Fancy" Pagestyle.
-\newpairofpagestyles{fancy}{
-	\ihead{}
-	\chead{\fancyheader}
-	\ohead{}
-	\ifoot{}
-	\cfoot{\fancyfooter}
-	\ofoot{}
-}
-
-% Create new "Chapter Page" Pagestyle.
-\newpairofpagestyles{chapterpage}{
-	\ihead{}
-	\chead{}
-	\ohead{}
-	\ifoot{}
-	\cfoot{\fancyfooter}
-	\ofoot{}
-}
-
-% Make "Fancy" the Default.
 \pagestyle{fancy}
-\renewcommand*{\chapterpagestyle}{chapterpage} % Automatically use "Chapter Page" Style for Chapters.
+\fancyhf{}
 
-\RedeclareSectionCommand[
-beforeskip=0pt,
-innerskip=0pt,
-afterskip=0pt,
-afterindent=false
-]{chapter}
-\setkomafont{chapter}{\fontspec{Signika}}
-% Redefine the chapter heading format:
-\renewcommand{\chapterlinesformat}[3]{%
-	% Here #1 = chapter number, #2 = chapter title, #3 = additional info.
-	\begin{tikzpicture}[overlay, remember picture]
-		% General Nodes.
-		\node (chapterCornerL) at ([yshift={-2.25cm}] current page text area.north west) {};
-		\node (chapterCornerR) at ([yshift={-2.25cm}] current page text area.north east) {};
+\fancyhead[C]{\fancyheader}
+\fancyfoot[C]{\fancyfooter}
 
-		% Outer Skews.
-		\drawSkew{chapterSkewPriBL}{chapterCornerL}{SW}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
-		\drawSkew{chapterSkewPriBR}{chapterCornerR}{SE}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
-
-		% Primary Connector.
-		\draw[primary, line width=\lineThickness] ([yshift=-0.5\lineThickness] chapterSkewPriBLN) -- ([yshift=-0.5\lineThickness] chapterSkewPriBRN);
-
-		% Calculate Offset for Secondary Color.
-		\newdimen\secondaryOffset
-		\newdimen\secondaryOffsetMacro
-		\pgfmathsetmacro{\secondaryOffsetMacro}{-1 * tan(\skewAngle) * (\lineThickness - \lineGap)}
-		\pgfmathsetlength{\secondaryOffset}{\secondaryOffsetMacro}
-
-		% Guides for Secondary Color.
-		\node (chapterSkewSecBLNode) at ([xshift={\secondaryOffset}, yshift={-\lineThickness - \lineGap}] chapterSkewPriBLNE) {};
-		\node (chapterSkewSecBRNode) at ([xshift={-\secondaryOffset}, yshift={-\lineThickness - \lineGap}] chapterSkewPriBRNW) {};
-
-		% Secondary Outer Skew.
-		\drawSkew{chapterSkewSecBL}{chapterSkewSecBLNode}{NW}{0.25\textHeight}{\skewThicknessSmall}{\skewAngle}{secondary}
-		\drawSkew{chapterSkewSecBR}{chapterSkewSecBRNode}{NE}{0.25\textHeight}{\skewThicknessSmall}{-\skewAngle}{secondary}
-
-		% Secondary Connector.
-		\draw[secondary, line width=\lineThicknessSmall] ([yshift=-0.5\lineThicknessSmall] chapterSkewSecBLN)
-		-- ([yshift=-0.5\lineThicknessSmall] chapterSkewSecBRN);
-
-		% Primary Lower Text Border. TODO: The Offset on the Diamond isn't perfect but will work for now.
-		\node (chapterSkewPriMLNode) at ([yshift={\lineGap}]chapterSkewPriBLN) {};
-		\drawSkew{chapterSkewPriML}{chapterSkewPriMLNode}{S}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
-		\pgfmathparse{0.5 * 0.70711 * (tan(\skewAngle) * \textHeight - 1.41421\lineGap)}
-		\newdimen\chapterDiamondW
-		\pgfmathsetlength{\chapterDiamondW}{\pgfmathresult}
-		\node[fill=secondary, minimum width=\chapterDiamondW, minimum height=\chapterDiamondW, inner sep=0pt, rotate=45] (chapterDiamondL) at ([xshift={-0.5\lineGap}] $(chapterSkewPriBLW) !0.5! (chapterSkewPriMLW)$) {};
-
-		% Draw Title.
-		\node[anchor=south west, inner sep=0pt, text=secondary] (chapterTitleBackground) at (chapterSkewPriMLSE) {\Huge\textbf{#3}};
-		\node[anchor=center, inner sep=0pt, text=primaryDark] (chapterTitleForeground) at ([xshift=-0.2mm, yshift=0.2mm]chapterTitleBackground.center) {\Huge\textbf{#3}};
-		\node[anchor=east, inner sep=0pt, text=secondary] (chapterNum) at ([xshift=2ex]chapterTitleForeground.east -| chapterSkewPriBRNE) {\Huge\textbf{#2}};
-
-
-	\end{tikzpicture}
-
-	% Optionally add vertical space so that the chapter body doesn’t overlap:
-	\vspace*{2cm}%
+\fancypagestyle{empty}{
+	\fancyhf{}  % Remove all header and footer content
 }
+
+\fancypagestyle{plain}{
+	\fancyhf{}  % Clear header and footer
+	\fancyfoot[C]{\fancyfooter} % Footer on chapter pages only
+}
+
+% Redefine the chapter heading format:
+%\renewcommand{\chapterlinesformat}[3]{%
+%	% Here #1 = chapter number, #2 = chapter title, #3 = additional info.
+%	\begin{tikzpicture}[overlay, remember picture]
+%		% General Nodes.
+%		\node (chapterCornerL) at ([yshift={-2.25cm}] current page text area.north west) {};
+%		\node (chapterCornerR) at ([yshift={-2.25cm}] current page text area.north east) {};
+%
+%		% Outer Skews.
+%		\drawSkew{chapterSkewPriBL}{chapterCornerL}{SW}{0.5\textHeight}{\skewThickness}{\skewAngle}{primary}
+%		\drawSkew{chapterSkewPriBR}{chapterCornerR}{SE}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+%
+%		% Primary Connector.
+%		\draw[primary, line width=\lineThickness] ([yshift=-0.5\lineThickness] chapterSkewPriBLN) -- ([yshift=-0.5\lineThickness] chapterSkewPriBRN);
+%
+%		% Calculate Offset for Secondary Color.
+%		\newdimen\secondaryOffset
+%		\newdimen\secondaryOffsetMacro
+%		\pgfmathsetmacro{\secondaryOffsetMacro}{-1 * tan(\skewAngle) * (\lineThickness - \lineGap)}
+%		\pgfmathsetlength{\secondaryOffset}{\secondaryOffsetMacro}
+%
+%		% Guides for Secondary Color.
+%		\node (chapterSkewSecBLNode) at ([xshift={\secondaryOffset}, yshift={-\lineThickness - \lineGap}] chapterSkewPriBLNE) {};
+%		\node (chapterSkewSecBRNode) at ([xshift={-\secondaryOffset}, yshift={-\lineThickness - \lineGap}] chapterSkewPriBRNW) {};
+%
+%		% Secondary Outer Skew.
+%		\drawSkew{chapterSkewSecBL}{chapterSkewSecBLNode}{NW}{0.25\textHeight}{\skewThicknessSmall}{\skewAngle}{secondary}
+%		\drawSkew{chapterSkewSecBR}{chapterSkewSecBRNode}{NE}{0.25\textHeight}{\skewThicknessSmall}{-\skewAngle}{secondary}
+%
+%		% Secondary Connector.
+%		\draw[secondary, line width=\lineThicknessSmall] ([yshift=-0.5\lineThicknessSmall] chapterSkewSecBLN)
+%		-- ([yshift=-0.5\lineThicknessSmall] chapterSkewSecBRN);
+%
+%		% Primary Lower Text Border. TODO: The Offset on the Diamond isn't perfect but will work for now.
+%		\node (chapterSkewPriMLNode) at ([yshift={\lineGap}]chapterSkewPriBLN) {};
+%		\drawSkew{chapterSkewPriML}{chapterSkewPriMLNode}{S}{0.5\textHeight}{\skewThickness}{-\skewAngle}{primary}
+%		\pgfmathparse{0.5 * 0.70711 * (tan(\skewAngle) * \textHeight - 1.41421\lineGap)}
+%		\newdimen\chapterDiamondW
+%		\pgfmathsetlength{\chapterDiamondW}{\pgfmathresult}
+%		\node[fill=secondary, minimum width=\chapterDiamondW, minimum height=\chapterDiamondW, inner sep=0pt, rotate=45] (chapterDiamondL) at ([xshift={-0.5\lineGap}] $(chapterSkewPriBLW) !0.5! (chapterSkewPriMLW)$) {};
+%
+%		% Draw Title.
+%		\node[anchor=south west, inner sep=0pt, text=secondary] (chapterTitleBackground) at (chapterSkewPriMLSE) {\Huge\textbf{#3}};
+%		\node[anchor=center, inner sep=0pt, text=primaryDark] (chapterTitleForeground) at ([xshift=-0.2mm, yshift=0.2mm]chapterTitleBackground.center) {\Huge\textbf{#3}};
+%		\node[anchor=east, inner sep=0pt, text=secondary] (chapterNum) at ([xshift=2ex]chapterTitleForeground.east -| chapterSkewPriBRNE) {\Huge\textbf{#2}};
+%
+%
+%	\end{tikzpicture}
+%
+%	% Optionally add vertical space so that the chapter body doesn’t overlap:
+%	\vspace*{2cm}%
+%}
+
+% Set TOC depth to include only parts, chapters, and sections
+\setcounter{tocdepth}{2}
 
 \endinput
